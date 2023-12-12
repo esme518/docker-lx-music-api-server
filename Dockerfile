@@ -10,7 +10,8 @@ WORKDIR /app
 
 RUN set -ex \
     && apk add --update --no-cache git \
-    && git clone --depth 1 -q ${REPO_URL} . \
+    && git clone ${REPO_URL} . \
+    && git checkout $(git tag | sort -V | tail -1) \
     && rm -rf .git* Dockerfile docker-compose.yml
 
 FROM python:3.10-slim
