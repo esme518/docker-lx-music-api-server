@@ -12,10 +12,12 @@ RUN set -ex \
     && apk add --update --no-cache git \
     && git clone ${REPO_URL} . \
     && git checkout $(git tag | sort -V | tail -1) \
-    && rm -rf .git* Dockerfile docker-compose.yml
+    && mkdir dist \
+    && echo "$(git tag | sort -V | tail -1)" > dist/version \
+    && mv main.py common modules requirements.txt -t dist
 
 FROM python:3.10-slim
-COPY --from=source /app /app
+COPY --from=source /app/dist /app
 
 WORKDIR /app
 
