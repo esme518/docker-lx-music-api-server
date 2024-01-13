@@ -16,7 +16,16 @@ RUN set -ex \
     && echo "$(git tag | sort -V | tail -1)" > dist/version \
     && mv main.py common modules requirements.txt -t dist
 
-FROM python:3.10-slim
+FROM cgr.dev/chainguard/wolfi-base
+
+ARG version=3.10
+
+RUN set -ex \
+    && apk add --update --no-cache \
+       python-${version} \
+       py${version}-pip \
+       tini
+
 COPY --from=source /app/dist /app
 
 WORKDIR /app
@@ -25,13 +34,9 @@ RUN set -ex \
     && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
     && pip list \
-    && apt-get update && apt install -y \
-       tini \
-    && apt-get autoremove -y \
-    && apt-get clean \
-    && rm -rf /tmp/* /var/lib/apt/lists/* /root/.cache/*
+    && rm -rf /root/.cache/*
 
 EXPOSE 9763
 
-ENTRYPOINT ["/usr/bin/tini", "--"]
-CMD ["python3","main.py"]
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD ["python","main.py"]
