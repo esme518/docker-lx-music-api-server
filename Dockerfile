@@ -16,21 +16,17 @@ RUN set -ex \
     && echo "$(git tag | sort -V | tail -1)" > dist/version \
     && mv main.py common modules requirements.txt -t dist
 
-FROM cgr.dev/chainguard/wolfi-base
+FROM esme518/wolfi-base-python:3.10
 
-ARG version=3.10
-
-RUN set -ex \
-    && apk add --update --no-cache \
-       python-${version} \
-       py${version}-pip \
-       tini
+ENV PYTHONUNBUFFERED=1
 
 COPY --from=source /app/dist /app
-
 WORKDIR /app
 
 RUN set -ex \
+    && apk add --update --no-cache \
+       tini \
+    && export PYTHONDONTWRITEBYTECODE=1 \
     && pip install --upgrade pip \
     && pip install --no-cache-dir -r requirements.txt \
     && pip list \
