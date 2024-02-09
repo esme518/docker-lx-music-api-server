@@ -11,9 +11,8 @@ WORKDIR /app
 RUN set -ex \
     && apk add --update --no-cache git \
     && git clone ${REPO_URL} . \
-    && git checkout $(git tag | sort -V | tail -1) \
     && mkdir dist \
-    && echo "$(git tag | sort -V | tail -1)" > dist/version \
+    && echo "$(git tag | sort -V | tail -1)+$(git rev-parse --short HEAD)" > dist/version \
     && mv main.py common modules requirements.txt -t dist
 
 FROM esme518/wolfi-base-python:3.10
