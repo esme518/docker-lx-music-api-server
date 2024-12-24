@@ -4,7 +4,7 @@
 
 FROM alpine as source
 
-ENV REPO_URL https://github.com/lxmusics/lx-music-api-server-python.git
+ENV REPO_URL https://github.com/MeoProject/lx-music-api-server.git
 
 WORKDIR /app
 
