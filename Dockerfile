@@ -2,36 +2,43 @@
 # Dockerfile for lx-music-api-server
 #
 
-FROM alpine as source
+FROM esme518/wolfi-base-python:3.10 AS builder
 
 ENV REPO_URL https://github.com/MeoProject/lx-music-api-server.git
+
+ENV LANG=C.UTF-8
+ENV PYTHONDONTWRITEBYTECODE=1
+ENV PYTHONUNBUFFERED=1
+ENV POETRY_VIRTUALENVS_IN_PROJECT=true
 
 WORKDIR /app
 
 RUN set -ex \
     && apk add --update --no-cache git \
-    && git clone ${REPO_URL} . \
-    && mkdir dist \
-    && echo "$(git tag | sort -V | tail -1)+$(git rev-parse --short HEAD)" > dist/version \
-    && mv main.py common modules requirements.txt -t dist
+    && git clone --depth 1 -q ${REPO_URL} . \
+    && echo "$(git tag | sort -V | tail -1)+$(git rev-parse --short HEAD)" > VERSION \
+    && rm -rf .git*
+
+RUN set -ex \
+    && pip install poetry \
+    && poetry install --no-root --no-interaction
 
 FROM esme518/wolfi-base-python:3.10
 
+COPY --from=builder /app /app
+ENV LANG=C.UTF-8
 ENV PYTHONUNBUFFERED=1
-
-COPY --from=source /app/dist /app
-WORKDIR /app
 
 RUN set -ex \
     && apk add --update --no-cache \
        tini \
-    && export PYTHONDONTWRITEBYTECODE=1 \
-    && pip install --upgrade pip \
-    && pip install --no-cache-dir -r requirements.txt \
-    && pip list \
-    && rm -rf /root/.cache/*
+    && rm -rf /tmp/* /var/cache/apk/*
 
-EXPOSE 9763
+ENV PATH="/app/.venv/bin":$PATH
+
+WORKDIR /app
+
+EXPOSE 9000
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["python","main.py"]
+CMD ["python", "app.py"]
