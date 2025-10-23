@@ -41,4 +41,4 @@ WORKDIR /app
 EXPOSE 9000
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["python", "app.py"]
+CMD ["python", "main.py"]
