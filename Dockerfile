@@ -4,7 +4,7 @@
 
 FROM esme518/wolfi-base-python:3.10 AS builder
 
-ENV REPO_URL https://github.com/MeoProject/lx-music-api-server.git
+ENV REPO_URL=https://github.com/MeoProject/lx-music-api-server.git
 
 ENV LANG=C.UTF-8
 ENV PYTHONDONTWRITEBYTECODE=1
@@ -21,6 +21,7 @@ RUN set -ex \
 
 RUN set -ex \
     && pip install poetry \
+    && sed -i 's/requires-python = ">=3.10"/requires-python = ">=3.10,<4.0"/' pyproject.toml \
     && poetry install --no-root --no-interaction
 
 FROM esme518/wolfi-base-python:3.10
